@@ -10,12 +10,13 @@
 
 using namespace std;
 
-#define DEBUG
-#define AVG_LENGTH 60                // The amount of samples to calcualte an average light reading.
-#define SAMPLE_RATE 0.2              // The sample rate in seconds.
+#define DEBUG 0
+#define AVG_LENGTH 30                // The amount of samples to calcualte an average light reading.
+#define SAMPLE_RATE 1                // The sample rate in seconds.
 #define MINIMUM_SUN_LIGHT_LEVEL 1500 // The minimum value to be considered sunny.
 
 uint16_t sPhotosensorPin = A0;
+uint16_t sLEDPin = D7;
 
 const char *sEmojiSun = "☀️";
 const char *sEmojiMoon = "🌑";
@@ -26,7 +27,7 @@ bool isSunny = false;
 
 int32_t averageOfLightReadings();
 
-#ifdef DEBUG
+#if DEBUG
 void printLightReadingsDebug()
 {
   Serial.printf("Average of light readings: %i, light readings: [", averageOfLightReadings());
@@ -44,7 +45,9 @@ void setup()
 {
   Serial.begin(9600);
 
-#ifdef DEBUG
+  pinMode(sLEDPin, OUTPUT);
+
+#if DEBUG
   while (!Serial.available())
   {
     // Wait for the serial port to connect.
@@ -70,24 +73,28 @@ void loop()
   {
     int32_t lightReadingsAverage = averageOfLightReadings();
 
+    Serial.printlnf("Light reading: %i, average: %i", lightReading, lightReadingsAverage);
+
     bool previousIsSunny = isSunny;
     isSunny = MINIMUM_SUN_LIGHT_LEVEL < lightReadingsAverage;
 
-    Serial.printlnf("Light reading: %i, average: %i", lightReading, lightReadingsAverage);
-
     if (previousIsSunny && !isSunny) // Light -> Dark
     {
-      Serial.printlnf("Event Trigged: %s, Status: LIGHT -> DARK", sParticleEventName);
+      Serial.printlnf("Event Trigged: %s, Status: %s -> %s", sParticleEventName, sEmojiSun, sEmojiMoon);
+
       Particle.publish(sParticleEventName, sEmojiMoon);
+      digitalWrite(sLEDPin, LOW);
     }
     else if (!previousIsSunny && isSunny) // Dark -> Light
     {
-      Serial.printlnf("Event Trigged: %s, Status: DARK -> LIGHT", sParticleEventName);
+      Serial.printlnf("Event Trigged: %s, Status: %s -> %s", sParticleEventName, sEmojiMoon, sEmojiSun);
+
       Particle.publish(sParticleEventName, sEmojiSun);
+      digitalWrite(sLEDPin, HIGH);
     }
   }
 
-#ifdef DEBUG
+#if DEBUG
   printLightReadingsDebug();
 #endif
 
