@@ -1,0 +1,14 @@
+{
+	"folders": [
+		{
+			"path": "."
+		}
+	],
+	"settings": {
+		"particle.compileButtonAction": "cloud",
+		"particle.targetDevice": "Bretts-Photon",
+		"particle.flashButtonAction": "cloud",
+		"particle.targetPlatform": "photon",
+		"cortex-debug.openocdPath": "/Users/brettbest/.particle/toolchains/openocd/0.10.0-particle.1/bin/openocd"
+	}
+}
